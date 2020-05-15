@@ -1,0 +1,9 @@
+A simple setup:
+
+  git clone <wherever you may find this>
+
+  npm install express
+  npm install jquery
+  npm start
+
+This will run a web server with the game on your local host, default on port 3000.
