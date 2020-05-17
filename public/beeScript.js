@@ -1,11 +1,15 @@
 const wordsFile = 'bee_list.txt';
-const centerLetter = 'r';
-var letters = 'yotrbal'
-var letterSet = letters.split("");
+const lettersFile = 'letters2.json';
+var centerLetter = '';
+var letterSet = new Set();
+// var letterSet = letters.split("");
 let wordsArray = [];
 let guessedWords = [];
 let maxPoints = 0;
 let wordsList = [];
+let thisDate = new Date();
+thisDate.setHours(0,0,0,0);
+let dateKey = thisDate.toJSON();
 
 
 function getWordsText () {
@@ -14,15 +18,35 @@ function getWordsText () {
     });
 }
 
-function handleData(data) {
+function getLetters () {
+    return $.ajax({
+        'url': lettersFile,
+        'dataType':'json'
+    });
+}
+
+function handleWordsData(data) {
     wordsArray = data.split('\n');
-    console.log(wordsArray);
+    // console.log(wordsArray);
     wordsList = getWordList(wordsArray);
     maxPoints = getMaxPoints(wordsList);
 
     displayCenterLetter();
     shuffleDisplay();
+}
 
+function handleLettersData(data) {
+    let letterSets = data.letterSets;
+    let i = 0;
+    for (letterSet of letterSets){
+        if (letterSet.date.valueOf() == dateKey.valueOf()){
+            break;
+        } else {
+            i ++;
+        }
+    }
+    centerLetter = letterSets[i].magicLetter;
+    letterSet = new Set(letterSets[i].letters);
 }
 
 function parseGuess() {
@@ -65,7 +89,7 @@ function shuffle(array) {
         let j = Math.floor(Math.random() * (i + 1));
         
         [array[i], array[j]] = [array[j], array[i]]
-        console.log(array);
+        // console.log(array);
     }
     return array;
 }
@@ -74,10 +98,9 @@ function displayCenterLetter() {
 }
 
 function shuffleDisplay() {
-    let letters = shuffle(letterSet);
     document.getElementById("letterSet").innerHTML = "";
-
-    for (let letter of letters){
+    letterArray = shuffle(Array.from(letterSet));
+    for (let letter of letterArray){
         if (letter === centerLetter) {
             document.getElementById("letterSet").innerHTML += `<font color="yellow">${letter} </font>`;
         } else {
@@ -158,6 +181,7 @@ function awardPoints(winningWord) {
 function getMaxPoints(wordsList) {
     let maxScore = 0;
     for (word of wordsList) {
+        console.log(word);
         maxScore += awardPoints(word);
     }
     return maxScore;
@@ -173,7 +197,7 @@ function getWordList(wordsArray) {
 
 function lettersInSet(word) {
     for (letter of word.split('')){
-        if (!letterSet.includes(letter)) return false;
+        if (!letterSet.has(letter)) return false;
     }
     return true;
 }
