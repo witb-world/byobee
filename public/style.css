@@ -1,10 +1,30 @@
 body {
-    background-color:grey;
-}
-h2 {
-    text-align: left;
+    background-color:rgb(38, 39, 41);
 }
 
-:root {
-    --bs-primary: yellow;
+h2, h1, h3, h4, p {
+    text-align: left;
+    color: snow;
+    margin-left: 2%;
+}
+#howto, #textentry, #cont, #letterDisplay {
+    color: snow;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-bottom: 2%;
+}
+#title {
+    background-color: rgb(38, 39, 41);
+    color: gold;
+    font-family: sans-serif
+}
+#results, #stats {
+    margin-left: 2%;
+    margin-bottom: 2%;
+    margin-right: 2%
+}
+#entrytext{
+    color: black;
+    margin-top: 5%;
+    margin-bottom: 5%
 }
