@@ -15,7 +15,6 @@ function hasSevenLetters(word) {
     for (letter of word) {
         letters.add(letter);
     }
-    // console.log(letters);
     return letters.size === 7;
 }
 
@@ -58,7 +57,5 @@ for (let i = 0; i < 365; i++){
     obj.letterSets.push(thisEntry);
 }
 
-var json = JSON.stringify(obj);
+let json = JSON.stringify(obj);
 fs.writeFileSync('letters2.json', json, 'utf8');
-
-// console.log(randomInt(30000));

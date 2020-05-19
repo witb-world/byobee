@@ -1,15 +1,21 @@
 const wordsFile = 'bee_list.txt';
 const lettersFile = 'letters2.json';
-var centerLetter = '';
-var letterSet = new Set();
+
+let centerLetter = '';
+let letterSet = new Set();
 let wordsArray = [];
 let guessedWords = [];
 let maxPoints = 0;
 let wordsList = [];
+
 let thisDate = new Date();
 thisDate.setHours(0, 0, 0, 0);
+
 let dateKey = thisDate.toJSON();
 
+/**************
+ * AJAX: pulling data from text and JSON files in server
+ **************/
 
 function getWordsText() {
     return $.ajax({
@@ -25,16 +31,18 @@ function getLetters() {
 }
 
 function handleWordsData(data) {
+    // handles data in text file containing all possible words,
+    // updates variables containing array of words for this game and total points
     wordsArray = data.split('\n');
-    // console.log(wordsArray);
     wordsList = getWordList(wordsArray);
     maxPoints = getMaxPoints(wordsList);
-
-    // displayCenterLetter();
     shuffleDisplay();
 }
 
 function handleLettersData(data) {
+    // handles JSON data in letter sets
+    // finds matching date out of letter sets, populates Set of letter
+    // and "center letter" of puzzle.
     let letterSets = data.letterSets;
     let i = 0;
     for (letterSet of letterSets) {
@@ -48,13 +56,18 @@ function handleLettersData(data) {
     letterSet = new Set(letterSets[i].letters);
 }
 
-function stripWhitespace(textStr) {
+/**************
+ * DOM: Interacting with HTML elements
+ **************/
 
-}
-
+ /**
+  * Retrieving and processing data.
+  */
 function parseGuess() {
+    // called in HTML form to validate and process each word guessed in game
+    // sends alert() to page determining if guess was successful or not.
     let valid = true;
-    let thisGuess = getGuess().toLowerCase().replace(/\s/g, '');
+    let thisGuess = getGuess().toLowerCase().replace(/\s/g, ''); // accepting spaces in guess.
     let msg = "";
 
     if (!validateforAlpha(thisGuess)) {
@@ -87,20 +100,20 @@ function parseGuess() {
     alert(msg);
 }
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
+function getGuess() {
+    // retrieves word entered in HTML guess form.
+    // returns that word as a js string variable.
+    let thisGuess = document.getElementById("guessText").value;
+    document.getElementById("guessText").value = "";
+    return thisGuess;
+}
 
-        [array[i], array[j]] = [array[j], array[i]]
-        // console.log(array);
-    }
-    return array;
-}
-function displayCenterLetter() {
-    document.getElementById("centerLetter").innerHTML = centerLetter;
-}
+/**
+ * Updating and formatting data.
+ */
 
 function shuffleDisplay() {
+    // shuffles contents of letterSet, updates display and highlights "center letter".
     document.getElementById("letterSet").innerHTML = "";
     letterArray = shuffle(Array.from(letterSet));
     for (let letter of letterArray) {
@@ -113,20 +126,22 @@ function shuffleDisplay() {
 }
 
 function updatePoints(guess) {
+    // updates points display elements in HTML, including points counter and progress bar.
+    // also updates display of points needed to reach next ranking.
     let currentPoints = Number(document.getElementById("points").innerHTML);
     currentPoints += awardPoints(guess);
     let rank = "Let's play!";
     let rankVal = currentPoints / maxPoints;
     let genius = maxPoints;
     let ranks = [{ rank: "Genius!", points: Math.floor(maxPoints * 0.20) },
-    { rank: "Amazing!", points: Math.floor(maxPoints * 0.10) },
-    { rank: "Niiiiice", points: Math.floor(maxPoints * 0.05) },
-    { rank: "Solid.", points: Math.floor(maxPoints * 0.025) },
-    { rank: "Making progress!", points: Math.floor(maxPoints * 0.008) },
-    { rank: "Moving up!", points: Math.floor(maxPoints * 0.004) },
-    { rank: "Good start!", points: Math.floor(maxPoints * 0.002) }];
+        { rank: "Amazing!", points: Math.floor(maxPoints * 0.10) },
+        { rank: "Niiiiice", points: Math.floor(maxPoints * 0.05) },
+        { rank: "Solid.", points: Math.floor(maxPoints * 0.025) },
+        { rank: "Making progress!", points: Math.floor(maxPoints * 0.008) },
+        { rank: "Moving up!", points: Math.floor(maxPoints * 0.004) },
+        { rank: "Good start!", points: Math.floor(maxPoints * 0.002) }
+    ];
     let levelBarValue = currentPoints / ranks[0].points;
-    console.log(Math.floor(levelBarValue * 100));
     let nextRank = ranks[6];
     let i = 0;
     for (ranking of ranks) {
@@ -145,11 +160,14 @@ function updatePoints(guess) {
 }
 
 function updateGuesses(guess) {
+    // updates value of "guesses" element in HTML.
     document.getElementById("guesses").innerHTML = formatGuesses(guessedWords);
 }
 
 function formatGuesses(guessedWords) {
-    let guessedWordsFormatted = '<ul class="list-inline">';
+    // accepts a list of words
+    // returns list formatted for HTML unordered list
+    let guessedWordsFormatted = '<p>Click on a word to look up what it means.<p><ul class="list-inline">';
     for (word of guessedWords) {
         guessedWordsFormatted += `<li class="list-inline-item"><a href="https://www.dictionary.com/browse/${word}" target="_blank">${word}</a></li>`
     }
@@ -157,29 +175,35 @@ function formatGuesses(guessedWords) {
     return guessedWordsFormatted;
 }
 
-function getGuess() {
-    var thisGuess = document.getElementById("guessText").value;
-    document.getElementById("guessText").value = "";
-    return thisGuess;
-}
+/**************
+ * Helper functions
+ **************/
 
 function validateforAlpha(input) {
+    // compares input to regex, checking if only alphabetical characters used.
     let re = RegExp("^[a-zA-Z]+$");
     return re.test(input);
 }
 
-function checkForLettersInSet() {
-    var text = lettersInSet(getGuess()) ? "Letters are in set" : "Letters not in set";
+function shuffle(array) {
+    // accepts an array, 
+    // returns an array with the same elements shuffled.
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]
+    }
+    return array;
 }
 
 function awardPoints(winningWord) {
+    // accepts a word
+    // returns its point value.
     let points = 0;
     if (winningWord.length < 5) {
         points = 1;
     } else {
         points = winningWord.length;
     }
-
     if (isPangram(winningWord)) {
         points += 7;
     }
@@ -188,15 +212,19 @@ function awardPoints(winningWord) {
 }
 
 function getMaxPoints(wordsList) {
+    // accepts an array of strings
+    // returns sum of points for each word.
     let maxScore = 0;
     for (word of wordsList) {
-        console.log(word);
         maxScore += awardPoints(word);
     }
     return maxScore;
 }
 
 function getWordList(wordsArray) {
+    // accepts an array of words
+    // returns an array of words with at least four characters,
+    // having the center letter and composed of letters in the letter set.
     return wordsArray.filter(word =>
         word.length > 3
         && word.includes(centerLetter)
@@ -205,6 +233,7 @@ function getWordList(wordsArray) {
 }
 
 function lettersInSet(word) {
+    // checks if a word is composed only of letters in set.
     for (letter of word.split('')) {
         if (!letterSet.has(letter)) return false;
     }
@@ -212,6 +241,7 @@ function lettersInSet(word) {
 }
 
 function isPangram(word) {
+    // checks if word features all letters in a set.
     for (letter of letterSet) {
         if (!word.includes(letter)) return false;
     }
